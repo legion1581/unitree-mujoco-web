@@ -1,0 +1,21 @@
+# deps / build
+node_modules/
+dist/
+
+# robot-derived assets (import them from your own robot; never committed)
+public/assets/
+!public/assets/.gitkeep
+public/registry/
+
+# wasm runtime copied out of node_modules by postinstall
+public/wasm/
+
+*.log
+
+# policy packs (proprietary weights — bring your own)
+policy-packs/*.zip
+policy-packs/**/*.zip
+
+# internal tooling (not shipped) — only the wasm postinstall copy is public
+scripts/*
+!scripts/copy-ort-wasm.mjs

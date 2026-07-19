@@ -1,0 +1,27 @@
+{
+  "name": "unitree-mujoco-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-based Unitree RL policy player — MuJoCo WASM physics + onnxruntime-web inference, FSM, live policy switching, gamepad teleop.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/copy-ort-wasm.mjs"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "js-yaml": "^4.1.0",
+    "mujoco": "^3.1.16",
+    "onnxruntime-web": "^1.27.0",
+    "three": "^0.185.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}

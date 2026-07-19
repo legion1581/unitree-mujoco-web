@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" />
+    <title>Unitree MuJoCo Web</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0e12;
+                   font: 13px/1.45 system-ui, sans-serif; color: #cdd6e0; }
+      #app { display: flex; height: 100%; }
+      #viewport { flex: 1; position: relative; min-width: 0; }
+      #viewport canvas { display: block; }
+      #inspector { width: 350px; box-sizing: border-box; padding: 12px;
+                   overflow: auto; background: #12161c;
+                   border-right: 1px solid #232a33; }
+      #inspector h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+                      color: #7d8794; margin: 0 0 8px; }
+      #inspector .body { white-space: pre; font-family: ui-monospace, monospace;
+                         font-size: 10.5px; color: #9fb0c0; line-height: 1.55;
+                         min-width: max-content; }
+      * { scrollbar-width: thin; scrollbar-color: #2b3542 transparent; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-thumb { background: #2b3542; border-radius: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      .hint { color: #66707c; font-size: 10.5px; line-height: 1.5; margin-top: 5px; }
+      #policy-manager { width: 280px; padding: 12px; box-sizing: border-box;
+               overflow-y: auto; background: #10151b; border-left: 1px solid #232a33; }
+      #policy-manager.hidden { display: none; }
+      #policy-manager h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+               color: #7d8794; margin: 0 0 8px; display: flex; align-items: center;
+               justify-content: space-between; }
+      #policy-manager button { width: 100%; box-sizing: border-box; margin: 2px 0;
+        background: #1a212b; color: #cdd6e0; border: 1px solid #2b3542; border-radius: 6px;
+        padding: 6px 8px; font: inherit; cursor: pointer; }
+      #policy-manager button:hover { background: #222b37; }
+      #policy-manager button.accent { background: #24425f; border-color: #3d6ca0;
+        color: #eaf2fa; }
+      #policy-manager button.accent:hover { background: #2b4a6f; }
+      .pack-robot { font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+        color: #5f6b78; margin: 12px 0 4px; }
+      .pack-card { display: flex; align-items: center; gap: 6px; margin: 4px 0;
+        background: #161c24; border: 1px solid #232a33; border-radius: 8px;
+        padding: 7px 6px 7px 10px; }
+      .pack-card:hover { border-color: #2f3a47; }
+      .pack-info { flex: 1; min-width: 0; }
+      .pack-name { font-size: 11.5px; color: #cdd6e0; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap; }
+      .pack-meta { font-size: 10px; color: #66707c; overflow: hidden;
+        text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
+      #policy-manager button.pack-del { flex: 0 0 auto; width: auto; margin: 0;
+        padding: 3px 8px; background: transparent; border-color: transparent;
+        opacity: .55; }
+      #policy-manager button.pack-del:hover { opacity: 1; background: #3a2027;
+        border-color: #5f2f3a; }
+      #panel { width: 300px; padding: 12px; box-sizing: border-box; overflow-y: auto;
+               background: #12161c; border-left: 1px solid #232a33; }
+      #panel h1 { font-size: 14px; margin: 0 0 10px; color: #e8eef4; }
+      #panel h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+                  color: #7d8794; margin: 14px 0 6px; }
+      #panel select, #panel button { width: 100%; box-sizing: border-box; margin: 2px 0;
+        background: #1a212b; color: #cdd6e0; border: 1px solid #2b3542; border-radius: 6px;
+        padding: 6px 8px; font: inherit; cursor: pointer; }
+      #panel button:hover { background: #222b37; }
+      #panel button.active { background: #2b4a6f; border-color: #3d6ca0; color: #fff; }
+      #panel .row { display: flex; gap: 4px; }
+      #panel .row button { flex: 1; }
+      #status { white-space: pre; font-family: ui-monospace, monospace; font-size: 11.5px;
+                color: #9fb0c0; margin-top: 8px; }
+      #overlay { position: absolute; inset: 0; display: flex; align-items: center;
+                 justify-content: center; text-align: center; background: #0b0e12;
+                 z-index: 10; padding: 24px; }
+      #overlay.hidden { display: none; }
+      kbd { background: #1a212b; border: 1px solid #2b3542; border-radius: 4px;
+            padding: 0 4px; font-family: ui-monospace, monospace; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="inspector">
+        <h2>Policy inspector</h2>
+        <div class="body" id="inspector-body">warming up…</div>
+      </aside>
+      <div id="viewport">
+        <div id="overlay"><div id="overlay-msg">loading…</div></div>
+      </div>
+      <aside id="policy-manager" class="hidden"></aside>
+      <div id="panel"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
