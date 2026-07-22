@@ -186,4 +186,18 @@ export class Engine {
   /** A scratch MjData on the same model (reference poses for motion tracking). */
   makeScratchData(): MjData { return new this.mj.MjData(this.model); }
   forwardData(d: MjData) { this.mj.mj_forward(this.model, d); }
+
+  // ---- ray casting (LIDAR emulation) ----------------------------------
+  private rayGid: { GetView(): Int32Array; delete(): void } | null = null;
+
+  /** Cast a ray from `pnt` along `vec`; `geomgroup` is a 6-slot 0/1 mask of
+   * geom groups the ray may hit. Returns the distance to the first hit and
+   * the geom id, or dist<0 / geom -1 on a miss. */
+  ray(pnt: number[], vec: number[], geomgroup: number[]): { dist: number; geom: number } {
+    const mj = this.mj as any;
+    if (!this.rayGid) this.rayGid = new mj.IntBuffer(1);
+    const dist: number = mj.mj_ray(this.model, this.data, pnt, vec, geomgroup,
+                                   1, -1, this.rayGid, null);
+    return { dist, geom: this.rayGid!.GetView()[0] };
+  }
 }

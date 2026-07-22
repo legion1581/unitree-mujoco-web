@@ -25,6 +25,7 @@ export interface PackManifest {
   baseName: string;              // e.g. "dances/gongfu"
   config: string;                // path in zip to the config yaml
   traj?: string;                 // path in zip to the reference csv (optional)
+  walker?: string;               // path in zip to an aux low-level walker net
   checkpoints: { id: string; file: string }[];
 }
 
@@ -84,6 +85,10 @@ export function parsePack(zip: Uint8Array): StoredPack {
   if (manifest.traj) {
     if (!files[manifest.traj]) throw new Error(`traj "${manifest.traj}" missing from zip`);
     kept[manifest.traj] = files[manifest.traj];
+  }
+  if (manifest.walker) {
+    if (!files[manifest.walker]) throw new Error(`walker "${manifest.walker}" missing from zip`);
+    kept[manifest.walker] = files[manifest.walker];
   }
   return { id: manifest.baseName, manifest, config, files: kept };
 }
@@ -170,6 +175,10 @@ export function resolvePackConfig(pack: StoredPack, entry: PolicyEntry): EvalCon
   if (pack.manifest.traj) {
     cfg.traj = { ...(cfg.traj ?? {}), path: blobUrl(pack.id, pack.manifest.traj,
                                                     pack.files[pack.manifest.traj]) };
+  }
+  if (pack.manifest.walker && cfg.go2?.walker) {
+    cfg.go2.walker.path = blobUrl(pack.id, pack.manifest.walker,
+                                  pack.files[pack.manifest.walker]);
   }
   return cfg;
 }

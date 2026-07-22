@@ -15,6 +15,7 @@ pack.json                 manifest (see below)
 config.yaml               the policy config (obs scheme, gains, family, robot)
 checkpoints/<id>.onnx …   one or more weight checkpoints (SAME obs scheme)
 traj.csv                  optional reference clip (motion-tracking families)
+walker.onnx               optional aux low-level walker net (vision family)
 ```
 
 All checkpoints in a pack share `config.yaml`; only the weights differ. Each

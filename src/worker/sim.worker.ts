@@ -462,6 +462,8 @@ class SimWorker {
       family: e?.family ?? "-",
       state: this.fsm.state,
       baseZ: this.eng.qpos[drv.bqp + 2],
+      baseXY: [this.eng.qpos[drv.bqp], this.eng.qpos[drv.bqp + 1]],
+      nObst: (drv as { nObst?: number }).nObst,
       command: [...this.command] as Command,
       drive: drv.clipDriven ? "clip" : drv.needsCommand ? "command" : "—",
       onnxInputs: (cfg?.policy?.onnx_inputs as number) ?? 1,

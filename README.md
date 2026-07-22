@@ -18,9 +18,11 @@ Policy), live policy switching, and gamepad teleop.
 **Two robot families today — R1 (covers R1 and R1 Air, which share one model)
 and Go2; G1 support is planned.** All six R1 on-robot policy families are
 supported (motion tracking, concat & split locomotion, AMP split, armsdk,
-mimic), plus Go2 locomotion (concat & split-gait), recovery and flip
-maneuvers. The selected policy decides the exact spec — picking a 20-DOF Air
-policy under the R1 family just works.
+mimic), plus every runnable Go2 family: locomotion (concat & split-gait),
+recovery, flip maneuvers, and vision — LIDAR obstacle avoidance, with the
+861-cell occupancy map ray-cast from the live terrain each step. The selected
+policy decides the exact spec — picking a 20-DOF Air policy under the R1
+family just works.
 
 **The repo ships no robot-derived files** — no models, no policy weights, no
 motion clips. You bring a model bundle for your robot, and import policies

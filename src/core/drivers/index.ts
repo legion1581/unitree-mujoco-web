@@ -10,7 +10,7 @@ import { MotionTrackingDriver } from "./motionTracking";
 import { ArmsdkDriver, AmpSplitDriver, LocomotionConcatDriver, LocomotionSplitDriver }
   from "./locomotion";
 import { MimicDriver } from "./mimic";
-import { Go2Driver, Go2FlipDriver } from "./go2";
+import { Go2Driver, Go2FlipDriver, Go2VisionDriver } from "./go2";
 
 export type { BaseDriver };
 
@@ -24,7 +24,13 @@ export async function makeDriver(cfg: EvalConfig, spec: RobotSpec, eng: Engine):
     return new Go2Driver(cfg, spec, eng, await OnnxSession.load(policyUrl));
   if (fam === "go2_flip")
     return new Go2FlipDriver(cfg, spec, eng, await OnnxSession.load(policyUrl));
-  // go2_vision (LIDAR nav) not ported yet
+  if (fam === "go2_vision") {
+    const walkerPath = cfg.go2?.walker?.path;
+    if (!walkerPath) throw new Error(`${cfg.name}: go2.walker.path missing`);
+    const [nav, walker] = await Promise.all([
+      OnnxSession.load(policyUrl), OnnxSession.load(assetUrl(walkerPath))]);
+    return new Go2VisionDriver(cfg, spec, eng, nav, walker);
+  }
 
   if (fam === "motion_tracking" || fam === "recovery") {
     const [policy, traj] = await Promise.all([

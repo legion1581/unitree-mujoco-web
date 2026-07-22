@@ -39,7 +39,9 @@ function formatInspect(m: InspectMsg): string {
   const topo = m.onnxInputs === 1 ? "1 tensor" : `${m.onnxInputs} tensors`;
   const L: string[] = [];
   L.push(`${pad(m.policy, 30)} ${m.family}`);
-  L.push(`state ${m.state}   base_z ${m.baseZ.toFixed(2)}   drive ${m.drive}`);
+  const xy = m.baseXY ? `   xy ${m.baseXY[0].toFixed(2)},${m.baseXY[1].toFixed(2)}` : "";
+  L.push(`state ${m.state}   base_z ${m.baseZ.toFixed(2)}${xy}   drive ${m.drive}`);
+  if (m.nObst !== undefined) L.push(`lidar ${m.nObst} occupied cells`);
   if (m.drive === "command")
     L.push(`cmd   vx ${vx.toFixed(2)} vy ${vy.toFixed(2)} wz ${wz.toFixed(2)}`);
   L.push("");

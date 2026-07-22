@@ -33,6 +33,23 @@ export interface Go2Cfg {
   ground_start?: string | null;    // null | "on_back"
   zero_vel?: boolean;
   flip?: Record<string, unknown>;  // flip maneuver params (see Go2FlipDriver)
+  // vision (hierarchical nav) family: nav net drives a low-level walker net
+  walker?: {
+    path: string;                  // walker network (concat locomotion)
+    ob_mean: number[]; ob_scale: number[];
+    act_mean: number[]; act_scale: number[];
+    kp: number[]; kd: number[];
+    clip_obs?: number; clip_act?: number;
+    memory_size: number; frame_dim: number;
+    frame_terms?: string[];
+  };
+  nav?: {
+    nav_obs?: string[]; ob_mean?: number[]; ob_scale?: number[];
+    clip_obs?: number; clip_act?: number;
+    vel_scale?: number[]; vel_filter?: number; avoid_min_vel?: number;
+    vision_dim?: number;
+  };
+  lidar?: Record<string, unknown>; // HeightMapSampler params (see core/lidar)
   [k: string]: unknown;
 }
 

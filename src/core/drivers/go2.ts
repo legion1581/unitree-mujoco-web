@@ -1,5 +1,5 @@
-/** Go2 quadruped drivers — TS port of the reference implementation's Go2Driver +
- * Go2FlipDriver (sim/drivers.py). Vision (LIDAR) is not ported yet.
+/** Go2 quadruped drivers — TS port of the reference implementation's Go2Driver,
+ * Go2FlipDriver and Go2VisionDriver.
  *
  * Go2Driver covers the go2_locomotion + go2_recovery families: obs are the
  * concatenated term vectors, normalized (raw - ob_mean) * ob_scale and clipped,
@@ -10,6 +10,7 @@
  * Go2FlipDriver is the one-shot flip maneuver: a ready-hold, an NN launch, then
  * a scripted control-point landing, with per-phase PD gains.
  */
+import { HeightMapSampler, type LidarCfg } from "../lidar";
 import { clip, concatF32, matFromWxyz, matTVec } from "../math";
 import type { OnnxSession } from "../policy";
 import type { Command, EvalConfig, Go2Cfg, RobotSpec } from "../types";
@@ -265,6 +266,144 @@ export class Go2FlipDriver extends BaseDriver {
       target = this.landingPose(lc);
     }
     this.k += 1; this.li += 1;
+    return target;
+  }
+}
+
+// =====================================================================
+// Go2 vision (hierarchical LIDAR obstacle-avoidance): the nav net maps
+// p_obs[9] + cmd[3] + vision[861] -> a velocity command that drives the
+// low-level concat walker net. The occupancy map is sampled from the live
+// terrain each step (vertical rays; see core/lidar).
+// =====================================================================
+export class Go2VisionDriver extends BaseDriver {
+  // walker (low-level locomotion net)
+  private readonly aScale: Float64Array;
+  private readonly wObMean: Float32Array;
+  private readonly wObScale: Float32Array;
+  private readonly wClipObs: number;
+  private readonly wClipAct: number;
+  private readonly mem: number;
+  private readonly wTerms: string[];
+  // nav (high-level avoidance net)
+  private readonly navTerms: string[];
+  private readonly navMean: Float32Array;
+  private readonly navScale: Float32Array;
+  private readonly navClipObs: number;
+  private readonly navClipAct: number;
+  private readonly velScale: number[];
+  private readonly velFilter: number;
+  private readonly avoidMinVel: number;
+  private readonly sampler: HeightMapSampler;
+
+  private hist: Float32Array[] = [];
+  private lastAct: Float32Array;
+  private lastNav = new Float32Array(3);
+  private velf = [0, 0, 0];
+  nObst = 0;                                  // occupancy cells set (inspector)
+
+  constructor(cfg: EvalConfig, spec: RobotSpec, eng: Engine,
+              readonly nav: OnnxSession, readonly walker: OnnxSession) {
+    super(cfg, spec, eng);
+    const g = cfg.go2 as Go2Cfg;
+    const w = g.walker!;
+    const nv = g.nav ?? {};
+    this.default = Float64Array.from(w.act_mean);
+    this.aScale = Float64Array.from(w.act_scale);
+    this.kp = Float64Array.from(w.kp); this.kd = Float64Array.from(w.kd);
+    this.wObMean = Float32Array.from(w.ob_mean);
+    this.wObScale = Float32Array.from(w.ob_scale);
+    this.wClipObs = w.clip_obs ?? 100; this.wClipAct = w.clip_act ?? 100;
+    this.mem = w.memory_size;
+    this.wTerms = w.frame_terms ?? [
+      "velocity_commands", "base_ang_vel", "projected_gravity",
+      "joint_pos", "joint_vel", "last_action"];
+    this.navTerms = nv.nav_obs ?? ["base_ang_vel", "projected_gravity", "last_nav"];
+    this.navMean = Float32Array.from(nv.ob_mean ?? new Array(9).fill(0));
+    this.navScale = Float32Array.from(nv.ob_scale ?? [0.25, 0.25, 0.25, 1, 1, 1, 1, 1, 1]);
+    this.navClipObs = nv.clip_obs ?? 10; this.navClipAct = nv.clip_act ?? 5;
+    this.velScale = nv.vel_scale ?? [1.2, 0.6, 2.0];
+    this.velFilter = nv.vel_filter ?? 0.99;
+    this.avoidMinVel = nv.avoid_min_vel ?? 0.05;
+    this.sampler = new HeightMapSampler((g.lidar ?? {}) as LidarCfg);
+    this.needsCommand = true;                 // the command is the high-level GOAL
+    this.stackDepth = this.mem;
+    this.lastAct = new Float32Array(this.n);
+    this.frameLayout = [
+      ...this.navTerms.map((t): [string, number] => ["[nav] " + t, 3]),
+      ["[nav] vision(occ)", this.sampler.n],
+      ["[walk] velocity_cmd", 3],
+    ];
+  }
+
+  override reset() {
+    this.seat(this.default, [1, 0, 0, 0], this.eng.allBodyIds());
+    this.hist = [];
+    this.lastAct = new Float32Array(this.n);
+    this.lastNav = new Float32Array(3);
+    this.velf = [0, 0, 0];
+  }
+
+  async step(command: Command): Promise<Float64Array> {
+    const goal = Float32Array.from(command);
+    const ang = this.baseAngVel();
+    const grav = matTVec(matFromWxyz(this.baseQuat()), [0, 0, -1]);
+    const hmap = this.sampler.sample(this.eng, this.bqp);
+    let nOcc = 0;
+    for (let i = 0; i < hmap.length; i++) nOcc += hmap[i];
+    this.nObst = nOcc;
+
+    // nav net -> filtered velocity command
+    const navParts: Record<string, ArrayLike<number>> = {
+      base_ang_vel: ang, projected_gravity: grav,
+      last_nav: this.lastNav, zero: [0, 0, 0],
+    };
+    const nraw = concatF32(this.navTerms.map((t) => navParts[t]));
+    const navIn = new Float32Array(nraw.length);
+    for (let i = 0; i < nraw.length; i++)
+      navIn[i] = clip((nraw[i] - this.navMean[i]) * this.navScale[i],
+                      -this.navClipObs, this.navClipObs);
+    const nout = await this.nav.run({
+      p_obs: { data: navIn, dims: [1, navIn.length] },
+      cmd: { data: goal, dims: [1, 3] },
+      vision: { data: hmap, dims: [1, hmap.length] },
+    });
+    const navAct = new Float32Array(3);
+    for (let i = 0; i < 3; i++)
+      navAct[i] = clip(nout[i], -this.navClipAct, this.navClipAct);
+    this.lastNav = navAct;
+    for (let i = 0; i < 3; i++)
+      this.velf[i] = this.velFilter * this.velf[i] +
+                     (1 - this.velFilter) * navAct[i] * this.velScale[i];
+    const cmd = [...this.velf];
+    if (Math.abs(cmd[0]) + Math.abs(cmd[1]) < this.avoidMinVel) { cmd[0] = 0; cmd[1] = 0; }
+
+    // low-level concat walker driven by the nav velocity
+    const [q, qd] = this.readQ();
+    const tv: Record<string, ArrayLike<number>> = {
+      velocity_commands: cmd, base_ang_vel: ang, projected_gravity: grav,
+      joint_pos: q, joint_vel: qd, last_action: this.lastAct,
+    };
+    const raw = concatF32(this.wTerms.map((t) => tv[t]));
+    const frame = new Float32Array(raw.length);
+    for (let i = 0; i < raw.length; i++)
+      frame[i] = clip((raw[i] - this.wObMean[i]) * this.wObScale[i],
+                      -this.wClipObs, this.wClipObs);
+    this.hist.push(frame);
+    if (this.hist.length > this.mem) this.hist = this.hist.slice(-this.mem);
+    const buf = this.hist.length < this.mem
+      ? [...Array(this.mem - this.hist.length).fill(this.hist[0]), ...this.hist]
+      : this.hist.slice(-this.mem);
+    const pObs = concatF32([...buf].reverse());          // newest-first
+    const inName = this.walker.inputNames[0];
+    const act = await this.walker.run({ [inName]: { data: pObs, dims: [1, pObs.length] } });
+    const a = new Float32Array(this.n);
+    for (let i = 0; i < this.n; i++) a[i] = clip(act[i], -this.wClipAct, this.wClipAct);
+    this.lastAct = a;
+    this.lastFrame = concatF32([navIn, hmap, cmd]);
+    this.lastAction = a;
+    const target = new Float64Array(this.n);
+    for (let i = 0; i < this.n; i++) target[i] = a[i] * this.aScale[i] + this.default[i];
     return target;
   }
 }
