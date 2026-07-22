@@ -78,8 +78,59 @@ class App {
   private overlay = document.getElementById("overlay")!;
   private overlayMsg = document.getElementById("overlay-msg")!;
   private inspectorBody = document.getElementById("inspector-body")!;
+  private lidarBox = this.makeLidarBox();
   private savedPrefs = "";
   private followZ = 0.7;    // camera look-at height, robot-size dependent
+
+  /** LIDAR occupancy minimap (vision policies): canvas + caption, hidden
+   * until inspect messages carry a grid. Robot at center, forward = up. */
+  private makeLidarBox() {
+    const box = document.createElement("div");
+    box.style.cssText = "display:none;margin:0 0 10px;";
+    const canvas = document.createElement("canvas");
+    canvas.style.cssText = "image-rendering:pixelated;border:1px solid #232a33;" +
+      "border-radius:4px;display:block;";
+    const cap = document.createElement("div");
+    cap.style.cssText = "color:#66707c;font-size:10px;margin-top:3px;";
+    cap.textContent = "LIDAR occupancy · forward ▲";
+    box.append(canvas, cap);
+    this.inspectorBody.parentElement!.insertBefore(box, this.inspectorBody);
+    return { box, canvas, cap };
+  }
+
+  private renderLidar(l?: { nx: number; ny: number; grid: number[] }) {
+    const { box, canvas, cap } = this.lidarBox;
+    if (!l) { box.style.display = "none"; return; }
+    box.style.display = "block";
+    const s = 7;                                     // px per cell
+    // robot frame: x forward, y left → screen: forward up, left left
+    const W = l.ny * s, H = l.nx * s;
+    if (canvas.width !== W || canvas.height !== H) {
+      canvas.width = W; canvas.height = H;
+      cap.textContent = `LIDAR occupancy · ${(l.nx * 0.05).toFixed(1)}×` +
+        `${(l.ny * 0.05).toFixed(1)} m · forward ▲`;
+    }
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#10151b";
+    ctx.fillRect(0, 0, W, H);
+    for (let ix = 0; ix < l.nx; ix++) {
+      for (let iy = 0; iy < l.ny; iy++) {
+        const v = l.grid[ix * l.ny + iy];            // order "xy": x outer
+        ctx.fillStyle = v > 0.5 ? "#ff8c5a" : "#181f28";
+        ctx.fillRect((l.ny - 1 - iy) * s + 1, (l.nx - 1 - ix) * s + 1, s - 1, s - 1);
+      }
+    }
+    // robot marker: cell nearest the base (grid center), pointing forward
+    const cx = (l.ny - 1 - (l.ny - 1) / 2) * s + s / 2;
+    const cy = (l.nx - 1 - (l.nx - 1) / 2) * s + s / 2;
+    ctx.fillStyle = "#7ad0ff";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 4.5);
+    ctx.lineTo(cx - 3.5, cy + 3.5);
+    ctx.lineTo(cx + 3.5, cy + 3.5);
+    ctx.closePath();
+    ctx.fill();
+  }
 
   constructor() {
     this.panel = new Panel(document.getElementById("panel")!,
@@ -195,6 +246,7 @@ class App {
         return;
       case "inspect":
         this.inspectorBody.textContent = formatInspect(m);
+        this.renderLidar(m.lidar);
         return;
       case "busy": return this.showOverlay(m.msg);
       case "ready": return this.overlay.classList.add("hidden");

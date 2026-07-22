@@ -301,6 +301,10 @@ export class Go2VisionDriver extends BaseDriver {
   private lastNav = new Float32Array(3);
   private velf = [0, 0, 0];
   nObst = 0;                                  // occupancy cells set (inspector)
+  lastHmap: Float32Array | null = null;       // latest grid (inspector minimap)
+  get lidarDims(): { nx: number; ny: number } {
+    return { nx: this.sampler.nx, ny: this.sampler.ny };
+  }
 
   constructor(cfg: EvalConfig, spec: RobotSpec, eng: Engine,
               readonly nav: OnnxSession, readonly walker: OnnxSession) {
@@ -352,6 +356,7 @@ export class Go2VisionDriver extends BaseDriver {
     let nOcc = 0;
     for (let i = 0; i < hmap.length; i++) nOcc += hmap[i];
     this.nObst = nOcc;
+    this.lastHmap = hmap;
 
     // nav net -> filtered velocity command
     const navParts: Record<string, ArrayLike<number>> = {

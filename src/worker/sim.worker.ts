@@ -464,6 +464,12 @@ class SimWorker {
       baseZ: this.eng.qpos[drv.bqp + 2],
       baseXY: [this.eng.qpos[drv.bqp], this.eng.qpos[drv.bqp + 1]],
       nObst: (drv as { nObst?: number }).nObst,
+      lidar: (() => {
+        const v = drv as { lastHmap?: Float32Array | null;
+                           lidarDims?: { nx: number; ny: number } };
+        return v.lastHmap && v.lidarDims
+          ? { ...v.lidarDims, grid: Array.from(v.lastHmap) } : undefined;
+      })(),
       command: [...this.command] as Command,
       drive: drv.clipDriven ? "clip" : drv.needsCommand ? "command" : "—",
       onnxInputs: (cfg?.policy?.onnx_inputs as number) ?? 1,

@@ -74,6 +74,7 @@ export interface InspectMsg {
   policy: string; family: string; state: string;
   baseZ: number; baseXY?: [number, number]; command: Command; drive: string;
   nObst?: number;            // vision family: occupied LIDAR cells this step
+  lidar?: { nx: number; ny: number; grid: number[] };  // occupancy minimap
   onnxInputs: number; stackDepth: number; perFrame: number;
   terms: { name: string; dim: number; vals: number[] }[];   // vals = first 6 of newest frame
   actions: { name: string; value: number }[];               // per driven joint
