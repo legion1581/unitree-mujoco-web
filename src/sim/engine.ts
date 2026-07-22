@@ -15,6 +15,16 @@ export const JNT_FREE = 0, JNT_BALL = 1, JNT_SLIDE = 2, JNT_HINGE = 3;
 export const GEOM_PLANE = 0, GEOM_HFIELD = 1, GEOM_SPHERE = 2, GEOM_CAPSULE = 3,
              GEOM_ELLIPSOID = 4, GEOM_CYLINDER = 5, GEOM_BOX = 6, GEOM_MESH = 7;
 
+/** Thrown when a robot's model bundle isn't present on disk. Not really an
+ * error condition — a fresh checkout ships no models — so callers surface it
+ * as an informational notice rather than a red error. */
+export class MissingBundleError extends Error {
+  constructor(readonly modelDir: string) {
+    super("No robot models loaded yet");
+    this.name = "MissingBundleError";
+  }
+}
+
 let modulePromise: Promise<MainModule> | null = null;
 
 /** The wasm module is a singleton — model reloads reuse it.
@@ -67,9 +77,13 @@ export class Engine {
       Promise<Engine> {
     const mj = await mujocoModule();
     const manifest: { files: string[] } =
-      await fetch(`${modelDir}/manifest.json`).then((r) => {
-        if (!r.ok) throw new Error(
-          `no manifest.json under ${modelDir} — add a model bundle (see README)`);
+      await fetch(`${modelDir}/manifest.json`).then(async (r) => {
+        // A missing file under the dev/preview server is answered with the SPA
+        // fallback (index.html, HTTP 200) rather than a 404, so !r.ok never
+        // fires and r.json() would blow up with "Unexpected token '<'". Treat a
+        // non-JSON body as "bundle absent" and say so clearly.
+        const ct = r.headers.get("content-type") ?? "";
+        if (!r.ok || !ct.includes("json")) throw new MissingBundleError(modelDir);
         return r.json();
       });
     const root = "/work";
@@ -79,7 +93,11 @@ export class Engine {
       const dir = rel.includes("/") ? rel.slice(0, rel.lastIndexOf("/")) : "";
       if (dir) mkdirTree(mj.FS, `${root}/${dir}`);
       if (rel.endsWith(".xml")) {
-        let text = await fetch(url).then((r) => r.text());
+        let text = await fetch(url).then((r) => {
+          if (!r.ok) throw new Error(
+            `bundle file listed in manifest.json is missing: ${rel} (${r.status})`);
+          return r.text();
+        });
         // threaded model compilation spawns wasm pthreads and then blocks on
         // them, which deadlocks in the browser — force single-threaded compile
         if (text.includes("<compiler "))
@@ -90,6 +108,8 @@ export class Engine {
         mj.FS.writeFile(`${root}/${rel}`, text);
       } else {
         const resp = await fetch(url);
+        if (!resp.ok) throw new Error(
+          `bundle file listed in manifest.json is missing: ${rel} (${resp.status})`);
         const ab: ArrayBuffer = await resp.arrayBuffer();
         mj.FS.writeFile(`${root}/${rel}`, new Uint8Array(ab));
       }

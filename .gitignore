@@ -2,9 +2,16 @@
 node_modules/
 dist/
 
-# robot-derived assets (import them from your own robot; never committed)
-public/assets/
+# robot-derived assets (import them from your own robot; never committed) —
+# except the go2 and r1 model bundles, which are checked in so a fresh clone
+# runs out of the box. Re-include per level: a parent dir must stay traversable
+# (dir/* instead of dir/) for the deeper negations to take effect.
+public/assets/*
 !public/assets/.gitkeep
+!public/assets/models/
+public/assets/models/*
+!public/assets/models/go2/
+!public/assets/models/r1/
 public/registry/
 
 # wasm runtime copied out of node_modules by postinstall

@@ -169,8 +169,9 @@ class App {
 
   private send(m: ToWorker) { this.worker.postMessage(m); }
 
-  private showOverlay(msg: string) {
+  private showOverlay(msg: string, kind: "busy" | "notice" | "error" = "busy") {
     this.overlayMsg.textContent = msg;
+    this.overlayMsg.dataset.kind = kind;
     this.overlay.classList.remove("hidden");
   }
 
@@ -248,9 +249,10 @@ class App {
         this.inspectorBody.textContent = formatInspect(m);
         this.renderLidar(m.lidar);
         return;
-      case "busy": return this.showOverlay(m.msg);
+      case "busy": return this.showOverlay(m.msg, "busy");
       case "ready": return this.overlay.classList.add("hidden");
-      case "error": return this.showOverlay(m.msg);
+      case "notice": return this.showOverlay(m.msg, "notice");
+      case "error": return this.showOverlay(m.msg, "error");
     }
   }
 

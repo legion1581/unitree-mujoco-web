@@ -1,0 +1,22 @@
+{
+ "files": [
+  "assets/base_0.obj",
+  "assets/base_1.obj",
+  "assets/base_2.obj",
+  "assets/base_3.obj",
+  "assets/base_4.obj",
+  "assets/calf_0.obj",
+  "assets/calf_1.obj",
+  "assets/calf_mirror_0.obj",
+  "assets/calf_mirror_1.obj",
+  "assets/foot.obj",
+  "assets/hip_0.obj",
+  "assets/hip_1.obj",
+  "assets/thigh_0.obj",
+  "assets/thigh_1.obj",
+  "assets/thigh_mirror_0.obj",
+  "assets/thigh_mirror_1.obj",
+  "go2.xml",
+  "scene.xml"
+ ]
+}

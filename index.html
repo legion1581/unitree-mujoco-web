@@ -71,6 +71,10 @@
                  justify-content: center; text-align: center; background: #0b0e12;
                  z-index: 10; padding: 24px; }
       #overlay.hidden { display: none; }
+      #overlay-msg { max-width: 560px; white-space: pre-wrap; line-height: 1.5;
+                     color: #9fb0c0; }
+      #overlay-msg[data-kind="notice"] { color: #cdd6e0; }
+      #overlay-msg[data-kind="error"] { color: #e5989b; }
       kbd { background: #1a212b; border: 1px solid #2b3542; border-radius: 4px;
             padding: 0 4px; font-family: ui-monospace, monospace; }
     </style>

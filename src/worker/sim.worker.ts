@@ -5,7 +5,7 @@ import { sampleTraj, wxyz } from "../core/math";
 import type { PolicyEntry, Command, EvalConfig, RobotSpec } from "../core/types";
 import { allPacks, deletePack, importAny, packEntries, resolvePackConfig,
          revokePack, type StoredPack } from "../packs";
-import { Engine } from "../sim/engine";
+import { Engine, MissingBundleError } from "../sim/engine";
 import { SimFSM, type FsmState } from "../sim/fsm";
 import { TERRAINS, terrainTransform, type TerrainName } from "../sim/terrain";
 import { getSpec, SPECS } from "../robots";
@@ -548,6 +548,17 @@ const sim = new SimWorker();
 let chain: Promise<void> = Promise.resolve();
 self.onmessage = (ev: MessageEvent<ToWorker>) => {
   chain = chain.then(() => sim.onMessage(ev.data)).catch((e) => {
+    // no model bundle on disk is the expected state of a fresh checkout, not a
+    // failure — surface it as a friendly notice, don't spam the console red.
+    if (e instanceof MissingBundleError) {
+      sim.busy = false;
+      post({ t: "notice", msg:
+        "No robot models loaded yet.\n\n" +
+        "Add a model bundle under public/assets/models/<robot>/ " +
+        "(scene.xml + meshes + manifest.json), then import policy packs " +
+        "via the Policy manager. See the README “Robot models” section." });
+      return;
+    }
     console.error(e);
     post({ t: "error", msg: String(e) });
   });
