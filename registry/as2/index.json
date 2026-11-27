@@ -1,0 +1,267 @@
+{
+  "robot": "as2",
+  "source": "AS2 OTA 2.0.2.0 ai_sport 1.0.0.17",
+  "policies": [
+    {
+      "name": "normal_walk/3_normal_walk",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/normal_walk/2026-03-11__21-21_.onnx",
+      "runnable": true,
+      "config": "registry/as2/normal_walk/3_normal_walk.yaml",
+      "note": "Normal walk (Start) \u2014 gait-clock walker, speed level Up (1.5 m/s) / Down (0.8 m/s)",
+      "fsm_id": 3
+    },
+    {
+      "name": "sport_mode/4_sport_mode",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/sport_mode/2026-05-14__18-14_.onnx",
+      "runnable": true,
+      "config": "registry/as2/sport_mode/4_sport_mode.yaml",
+      "note": "Sport mode (L2+Start) \u2014 fast trot (3.5 m/s \u00d7 stick), net stepped twice per tick",
+      "fsm_id": 4
+    },
+    {
+      "name": "climb_mode/5_climb_mode",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/climb_mode/2026-01-30__22-03_.onnx",
+      "runnable": true,
+      "config": "registry/as2/climb_mode/5_climb_mode.yaml",
+      "note": "Climb mode (R1+X) \u2014 stair / obstacle walker (raised front legs), stepped twice per tick",
+      "fsm_id": 5
+    },
+    {
+      "name": "sided_gait/6_left_side_gait",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/sided_gait/2026-05-11__12-14_.onnx",
+      "runnable": true,
+      "config": "registry/as2/sided_gait/6_left_side_gait.yaml",
+      "note": "Left side gait (X X) \u2014 one sided_gait net, roll command \u22120.4; Start = back to walking",
+      "fsm_id": 6
+    },
+    {
+      "name": "sided_gait/7_right_side_gait",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/sided_gait/2026-05-11__12-14_.onnx",
+      "runnable": true,
+      "config": "registry/as2/sided_gait/7_right_side_gait.yaml",
+      "note": "Right side gait (Y Y) \u2014 one sided_gait net, roll command +0.4; Start = back to walking",
+      "fsm_id": 7
+    },
+    {
+      "name": "sided_gait/8_handstand",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/sided_gait/2026-05-11__12-14_.onnx",
+      "runnable": true,
+      "config": "registry/as2/sided_gait/8_handstand.yaml",
+      "note": "Hand stand (R1 R1) \u2014 one sided_gait net, pitch command +1.2 (front legs); Start = back to walking",
+      "fsm_id": 8
+    },
+    {
+      "name": "sided_gait/9_biped_stand",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/sided_gait/2026-05-11__12-14_.onnx",
+      "runnable": true,
+      "config": "registry/as2/sided_gait/9_biped_stand.yaml",
+      "note": "Biped stand (R2 R2) \u2014 one sided_gait net, pitch command \u22121.2 (hind legs); Start = back to walking",
+      "fsm_id": 9
+    },
+    {
+      "name": "flip/10_front_flip",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/flip/f2026-06-07__16-07_.onnx",
+      "runnable": true,
+      "config": "registry/as2/flip/10_front_flip.yaml",
+      "note": "Front flip (Up Up) \u2014 1.43 s phase-driven forward flip, then normal walk",
+      "fsm_id": 10
+    },
+    {
+      "name": "flip/11_back_flip",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/flip/b2026-06-04__20-31_.onnx",
+      "runnable": true,
+      "config": "registry/as2/flip/11_back_flip.yaml",
+      "note": "Back flip (Down Down) \u2014 1.43 s phase-driven back flip, then normal walk",
+      "fsm_id": 11
+    },
+    {
+      "name": "recovery/12_recovery",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/recovery/2026-01-07__18-00_.onnx",
+      "runnable": true,
+      "config": "registry/as2/recovery/12_recovery.yaml",
+      "note": "Recovery (L2+X) \u2014 relax \u2192 fold (leg IK) \u2192 recovery net \u2192 normal walk; starts on the back",
+      "fsm_id": 12
+    },
+    {
+      "name": "base_height/13_base_height",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/base_height/2026-06-09__20-35_.onnx",
+      "runnable": true,
+      "config": "registry/as2/base_height/13_base_height.yaml",
+      "note": "Base height (L1+Up / L1+Down) \u2014 walker with a body-height command, L1+Up / L1+Down \u00b10.005 m per tick",
+      "fsm_id": 13
+    },
+    {
+      "name": "euler/15_euler",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/euler/2026-05-26__21-14_.onnx",
+      "runnable": true,
+      "config": "registry/as2/euler/15_euler.yaml",
+      "note": "Euler (body pose) (Select) \u2014 stands still; sticks = roll / pitch / yaw body pose",
+      "fsm_id": 15
+    },
+    {
+      "name": "mimic/16_bai_nian",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/bai_nian.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/16_bai_nian.yaml",
+      "note": "Bai nian (New-Year bow) (L1+A) \u2014 motion net bai_nian.mnn frames 50..400 (7.0 s)",
+      "fsm_id": 16
+    },
+    {
+      "name": "mimic/17_bi_xin",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/bi_xin.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/17_bi_xin.yaml",
+      "note": "Bi xin (heart) (R2+Y) \u2014 motion net bi_xin.mnn frames 50..361 (6.2 s)",
+      "fsm_id": 17
+    },
+    {
+      "name": "mimic/18_content",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/content.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/18_content.yaml",
+      "note": "Content (R2+X) \u2014 motion net content.mnn frames 0..261 (5.2 s)",
+      "fsm_id": 18
+    },
+    {
+      "name": "mimic/19_dance1",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/dance1.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/19_dance1.yaml",
+      "note": "Dance 1 (L1+B) \u2014 motion net dance1.mnn frames 0..942 (18.8 s)",
+      "fsm_id": 19
+    },
+    {
+      "name": "mimic/20_dance2",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/dance2.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/20_dance2.yaml",
+      "note": "Dance 2 (L1+X) \u2014 motion net dance2.mnn frames 0..1918 (38.4 s)",
+      "fsm_id": 20
+    },
+    {
+      "name": "mimic/21_handshake",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/wo_shou.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/21_handshake.yaml",
+      "note": "Handshake (wo shou) (R2+B) \u2014 motion net wo_shou.mnn frames 70..220 (3.0 s)",
+      "fsm_id": 21
+    },
+    {
+      "name": "mimic/22_stretch",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/shen_lan_yao.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/22_stretch.yaml",
+      "note": "Stretch (shen lan yao) (R2+A) \u2014 motion net shen_lan_yao.mnn frames 60..250 (3.8 s)",
+      "fsm_id": 22
+    },
+    {
+      "name": "mimic/23_sit",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/sit_down.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/23_sit.yaml",
+      "note": "Sit (R1+B) \u2014 motion net sit_down.mnn frames 40..170 (2.6 s)",
+      "fsm_id": 23
+    },
+    {
+      "name": "mimic/24_front_jump",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/front_jump.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/24_front_jump.yaml",
+      "note": "Front jump (R1+A) \u2014 motion net front_jump.mnn frames 0..50 (1.0 s)",
+      "fsm_id": 24
+    },
+    {
+      "name": "mimic/25_pushup",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/fuwocheng.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/25_pushup.yaml",
+      "note": "Push-up (fu wo cheng) (L1+Y) \u2014 motion net fuwocheng.mnn frames 30..310 (5.6 s)",
+      "fsm_id": 25
+    },
+    {
+      "name": "mimic/26_up_jump",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "policy": "assets/policies/as2/mimic/up_jump.onnx",
+      "runnable": true,
+      "config": "registry/as2/mimic/26_up_jump.yaml",
+      "note": "Up jump (R1+Y) \u2014 motion net up_jump.mnn frames 0..54 (1.1 s)",
+      "fsm_id": 26
+    },
+    {
+      "name": "obsolete/pose_2026-05-26__21-07_",
+      "family": "as2_fw",
+      "robot": "as2",
+      "dof": 12,
+      "runnable": false,
+      "note": "model/pose: no config, never loaded by ai_sport 1.0.0.17"
+    }
+  ]
+}

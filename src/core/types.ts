@@ -17,6 +17,15 @@ export interface Go2Cfg {
   [k: string]: unknown;
 }
 
+/** AS2 block of a firmware pack (`as2.firmware: true`); the driver reads it as As2FwCfg (as2_fw.ts). */
+export interface As2Cfg {
+  firmware?: boolean;
+  fsm_id?: number;
+  /** extra networks by role -> path or blob url */
+  aux_models?: Record<string, string>;
+  [k: string]: unknown;
+}
+
 export interface G1Cfg {
   obs_scheme?: string;
   control_joints: number[];
@@ -132,12 +141,13 @@ export interface G1LegacyMode {
 
 export interface EvalConfig {
   name: string;
-  robot: string;                     // "r1" | "r1_air" | "g1" | "go2" (pack manifest robot)
-  family: string;                    // r1_fw | go2_fw | g1_*
+  robot: string;                     // "r1" | "r1_air" | "g1" | "go2" | "as2" (pack manifest robot)
+  family: string;                    // r1_fw | go2_fw | as2_fw | g1_*
   control: { fps?: number; step_dt: number; sim_dt: number; cmd_delay?: number;
              time_start?: number; time_end?: number; duration?: number };
   policy: PolicyCfg;
   go2?: Go2Cfg;
+  as2?: As2Cfg;
   g1?: G1Cfg;
   /** R1 block (`firmware: true`, read as R1FwCfg in r1_fw.ts); `models` = R1 variants the policy runs on
    * ("air" = 20-DOF, "edu" = 24-DOF), like g1.models */

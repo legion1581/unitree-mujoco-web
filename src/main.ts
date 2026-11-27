@@ -355,7 +355,7 @@ class App {
         this.lastFrame = null;
         // aim the camera at torso height: ~0.7 m for humanoids, lower for
         // the quadruped so its body doesn't sit at the bottom of the frame
-        this.followZ = m.desc.robot.startsWith("go2") ? 0.35 : 0.7;
+        this.followZ = m.desc.robot.startsWith("go2") || m.desc.robot.startsWith("as2") ? 0.35 : 0.7;
         return;
       case "frame":
         this.lastFrame = { xpos: m.xpos, xmat: m.xmat };

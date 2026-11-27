@@ -1,0 +1,23 @@
+{
+ "files": [
+  "meshes/FL_calf.STL",
+  "meshes/FL_foot.STL",
+  "meshes/FL_hip.STL",
+  "meshes/FL_thigh.STL",
+  "meshes/FR_calf.STL",
+  "meshes/FR_foot.STL",
+  "meshes/FR_hip.STL",
+  "meshes/FR_thigh.STL",
+  "meshes/RL_calf.STL",
+  "meshes/RL_foot.STL",
+  "meshes/RL_hip.STL",
+  "meshes/RL_thigh.STL",
+  "meshes/RR_calf.STL",
+  "meshes/RR_foot.STL",
+  "meshes/RR_hip.STL",
+  "meshes/RR_thigh.STL",
+  "meshes/base_link.STL",
+  "as2.xml",
+  "scene.xml"
+ ]
+}

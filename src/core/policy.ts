@@ -82,4 +82,16 @@ export class OnnxSession {
     const out = await this.sess.run(f);
     return out[this.sess.outputNames[0]].data as Float32Array;
   }
+
+  /** Every output by name (multi-output nets, e.g. the AS2 mimic nets: actions + reference joint / body state). */
+  async runAll(feeds: Record<string, { data: Float32Array; dims: number[] }>): Promise<Record<string, Float32Array>> {
+    const f: Record<string, ort.Tensor> = {};
+    for (const name of this.sess.inputNames) {
+      const t = feeds[name];
+      if (!t) throw new Error(`missing ONNX input '${name}'`);
+      f[name] = new ort.Tensor("float32", t.data, declaredDims(this.sess, name, t.data.length, t.dims));
+    }
+    const out = await this.sess.run(f);
+    return Object.fromEntries(this.sess.outputNames.map((n) => [n, out[n].data as Float32Array]));
+  }
 }

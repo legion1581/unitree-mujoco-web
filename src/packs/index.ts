@@ -21,8 +21,8 @@ import type { EvalConfig, PolicyEntry } from "../core/types";
 export interface PackManifest {
   schemaVersion: number;
   group: string;                 // obs-scheme label to group by in the UI
-  robot: string;                 // g1 | r1 | r1_air | go2
-  family: string;                // g1_* | r1_fw | go2_fw
+  robot: string;                 // g1 | r1 | r1_air | go2 | as2
+  family: string;                // g1_* | r1_fw | go2_fw | as2_fw
   baseName: string;              // e.g. "cpy_walk_run_29dofs/actor"
   config: string;                // path in zip to the config yaml
   clip?: string;                 // path in zip to reference motion clip (G1 mimic)
@@ -150,7 +150,7 @@ export function packEntries(pack: StoredPack): PolicyEntry[] {
     packId: pack.id,
     checkpointFile: c.file,
     fsmId: pack.config.g1?.fsm_id ?? (pack.config.r1?.fsm_id as number | undefined)
-      ?? (pack.config.go2?.fsm_id as number | undefined),
+      ?? (pack.config.go2?.fsm_id as number | undefined) ?? (pack.config.as2?.fsm_id as number | undefined),
     models: pack.config.g1?.models ?? pack.config.r1?.models,
   }));
 }
@@ -210,6 +210,12 @@ export function resolvePackConfig(pack: StoredPack, entry: PolicyEntry): EvalCon
     const aux: Record<string, string> = { ...(cfg.go2.aux_models ?? {}) };
     for (const [role, file] of Object.entries(pack.manifest.aux)) aux[role] = blobUrl(pack.id, file, pack.files[file]);
     cfg.go2.aux_models = aux;
+  }
+  // AS2 firmware packs: extra nets under `as2.aux_models`
+  if (pack.manifest.aux && cfg.as2) {
+    const aux: Record<string, string> = { ...(cfg.as2.aux_models ?? {}) };
+    for (const [role, file] of Object.entries(pack.manifest.aux)) aux[role] = blobUrl(pack.id, file, pack.files[file]);
+    cfg.as2.aux_models = aux;
   }
   if (pack.manifest.clip && cfg.g1) {
     cfg.g1.motion_clip = blobUrl(pack.id, pack.manifest.clip,

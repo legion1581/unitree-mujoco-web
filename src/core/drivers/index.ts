@@ -1,6 +1,6 @@
 /** Driver factory — builds the right driver for a policy config and loads its
  * networks (and clip / data files, when the family needs them). Every pack is a
- * firmware-faithful G1 / R1 / Go2 policy: R1 → r1_fw.ts, Go2 → go2_fw.ts, G1 →
+ * firmware-faithful G1 / R1 / Go2 / AS2 policy: R1 → r1_fw.ts, Go2 → go2_fw.ts, AS2 → as2_fw.ts, G1 →
  * the g1*.ts drivers picked by `g1.obs_scheme`. */
 import { OnnxPolicy, OnnxSession } from "../policy";
 import type { EvalConfig, RobotSpec } from "../types";
@@ -16,6 +16,7 @@ import { G1FaceupDriver, G1Squat2StandDriver } from "./g1_faceup";
 import { G1JumpDriver } from "./g1_jump";
 import { makeR1FwDriver } from "./r1_fw";
 import { makeGo2FwDriver } from "./go2_fw";
+import { makeAs2FwDriver } from "./as2_fw";
 
 export type { BaseDriver };
 
@@ -28,6 +29,8 @@ export async function makeDriver(cfg: EvalConfig, spec: RobotSpec, eng: Engine):
   if (cfg.r1?.firmware) return makeR1FwDriver(cfg, spec, eng);
   // Go2 mcf firmware policies (registry/go2, see go2_fw.ts)
   if (cfg.go2?.firmware) return makeGo2FwDriver(cfg, spec, eng);
+  // AS2 ai_sport firmware policies (registry/as2, see as2_fw.ts)
+  if (cfg.as2?.firmware) return makeAs2FwDriver(cfg, spec, eng);
 
   if (fam.startsWith("g1_") || cfg.robot === "g1" || cfg.g1) {
     // 813 CpyWalkJump / 900 ZjxWalkJump: future-state / 201-dim mimics of the walk-jump clip (see g1_jump.ts)
@@ -74,5 +77,5 @@ export async function makeDriver(cfg: EvalConfig, spec: RobotSpec, eng: Engine):
     return new G1LocoDriver(cfg, spec, eng, sess, aux);
   }
 
-  throw new Error(`no driver for family '${fam}' (${cfg.name}) — not a G1 / R1 / Go2 firmware pack`);
+  throw new Error(`no driver for family '${fam}' (${cfg.name}) — not a G1 / R1 / Go2 / AS2 firmware pack`);
 }

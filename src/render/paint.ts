@@ -5,7 +5,8 @@
  * Go2's mirrored leg meshes) paint together. Palettes model the shipping
  * colourways from the product photos: R1 = glossy white shell with navy
  * accents, mirrored orange visor lens and gunmetal hands; Go2 = light-grey matte body with
- * brushed-aluminium motor housings and black face / feet. Robots without a
+ * brushed-aluminium motor housings and black face / feet; AS2 = blue-grey anodised shell, polished aluminium
+ * drums and calves, black LiDAR and rubber feet. Robots without a
  * palette (G1) render the model's own rgba.
  *
  * Where a real colour boundary falls inside a single mesh (the R1 head carries
@@ -27,6 +28,7 @@ export type Finish =
   | "rubber"     // feet, soles
   | "metal"      // brushed aluminium motor housings
   | "gunmetal"   // dark metallic hands / linkages
+  | "anodised"   // bead-blasted anodised aluminium shell (AS2)
   | "mirror";    // iridescent mirrored lens
 
 export interface Paint {
@@ -71,6 +73,7 @@ export const FINISH: Record<Finish, {
   rubber:   { roughness: 0.85, metalness: 0.0,  clearcoat: 0.0,  clearcoatRoughness: 0.5 },
   metal:    { roughness: 0.42, metalness: 0.9,  clearcoat: 0.0,  clearcoatRoughness: 0.3 },
   gunmetal: { roughness: 0.38, metalness: 0.6,  clearcoat: 0.3,  clearcoatRoughness: 0.3 },
+  anodised: { roughness: 0.5,  metalness: 0.35, clearcoat: 0.15, clearcoatRoughness: 0.4 },
   mirror:   { roughness: 0.08, metalness: 0.6,  clearcoat: 1.0,  clearcoatRoughness: 0.03,
               iridescence: 1.0, iridescenceIOR: 1.8, iridescenceThicknessRange: [300, 520] },
 };
@@ -241,10 +244,44 @@ const GO2_RULES: Rule[] = [
   { re: /^calf_1$|^foot$/, paint: GO2_FOOT },    // foot pads
 ];
 
+// ---- AS2 (official unitree.com/As2 renders: blue-grey anodised shell and thigh covers, polished aluminium
+// motor drums and calves, black LiDAR cage, dark rubber ball feet) --------------------------------------------
+const AS2_SHELL: Paint = { color: 0x7c8598, finish: "anodised" };    // anodised blue-grey (#929bb1 lit / #686f81 shade)
+const AS2_PANEL: Paint = { color: 0x666d7d, finish: "anodised" };    // side battery panel, body front / back faces
+const AS2_BELLY: Paint = { color: 0x3a3d43, finish: "satin" };       // underside
+const AS2_ALU: Paint = { color: 0xcfd2d6, finish: "metal" };         // motor drums, calves (#c0c2c5 … #dedfe0)
+const AS2_LIDAR: Paint = { color: 0x1c1d1f, finish: "satin" };       // L2 LiDAR cage
+const AS2_HANDLE: Paint = { color: 0xd6dae0, finish: "metal" };      // front handle around the LiDAR
+const AS2_FOOT: Paint = { color: 0x2e2f33, finish: "rubber" };
+
+/** base_link.STL frame (= body frame): hip-abduction drums at both ends (|x| > 0.104, below the neck), the head on
+ * the neck with the LiDAR sphere at (0.283, 0, 0.078) and the U handle in front of it. */
+const AS2_BASE_REGIONS: Region[] = [
+  { paint: AS2_LIDAR, test: (x, y, z) => x > 0.235 && Math.hypot(x - 0.283, y, z - 0.078) < 0.05 },
+  { paint: AS2_HANDLE, test: (x) => x > 0.29 },
+  { paint: AS2_ALU, test: (x, y, z) => Math.abs(x) > 0.104 && x < 0.2 && z < 0.045 },
+  { paint: AS2_BELLY, test: (x, y, z, nx, ny, nz) => z < -0.05 && nz < -0.5 },
+  { paint: AS2_PANEL, test: (x, y, z, nx, ny) => Math.abs(y) > 0.106 && Math.abs(ny) > 0.7 && z < 0.06 },
+  { paint: AS2_PANEL, test: (x, y, z, nx) => Math.abs(x) > 0.09 && Math.abs(x) < 0.106 && Math.abs(nx) > 0.8 && z < 0.05 },
+];
+/** *_thigh.STL: the thigh-motor drum runs inward (toward the body) from the outer cap; left legs inward = −y,
+ * right legs (mirror images) +y. */
+const as2Thigh = (side: number): Region[] => [{ paint: AS2_ALU, test: (x, y, z) => side * y < -0.045 && z > -0.045 }];
+
+const AS2_RULES: Rule[] = [
+  { re: /^base$/, paint: AS2_SHELL, regions: AS2_BASE_REGIONS },
+  { re: /^(FL|FR|RL|RR)_hip$/, paint: AS2_ALU },
+  { re: /^(FL|RL)_thigh$/, paint: AS2_SHELL, regions: as2Thigh(1) },
+  { re: /^(FR|RR)_thigh$/, paint: AS2_SHELL, regions: as2Thigh(-1) },
+  { re: /^(FL|FR|RL|RR)_calf$/, paint: AS2_ALU },
+  { re: /^(FL|FR|RL|RR)_foot$/, paint: AS2_FOOT },
+];
+
 const PALETTES: Record<string, Palette> = {
   r1: { rules: R1_RULES, fallback: R1_WHITE },
   r1_air: { rules: R1_AIR_RULES, fallback: R1_WHITE },
   go2: { rules: GO2_RULES, fallback: GO2_BODY },
+  as2: { rules: AS2_RULES, fallback: AS2_SHELL },
 };
 
 /** The palette for a robot (spec name), or null to keep the model rgba. */
@@ -252,6 +289,7 @@ function paletteFor(robot: string): Palette | null {
   if (robot === "r1_air") return PALETTES.r1_air;
   if (robot.startsWith("r1")) return PALETTES.r1;     // r1, r1_air_edu (EDU body)
   if (robot.startsWith("go2")) return PALETTES.go2;
+  if (robot.startsWith("as2")) return PALETTES.as2;
   return null;
 }
 

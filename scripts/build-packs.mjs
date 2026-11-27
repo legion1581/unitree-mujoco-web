@@ -2,7 +2,7 @@
 /** Build every runnable policy of a robot into individual packs, then wrap the
  * whole folder into ONE per-model bundle you can hand to a file host.
  *
- *   node scripts/build-packs.mjs [--robot g1|r1|go2] [--public <dir>] [--no-build] [--no-bundle]
+ *   node scripts/build-packs.mjs [--robot g1|r1|go2|as2] [--public <dir>] [--no-build] [--no-bundle]
  *
  *   --robot  <name>   registry to read           (default: r1)
  *   --public <dir>    checkout holding registry/<robot>/ + assets/ (default: this repo; the
@@ -71,9 +71,10 @@ function buildPack(entry) {
     baseName: entry.name, config: "config.yaml",
     checkpoints: [{ id, file: ckptFile }],
   };
-  // extra networks the drivers run (G1 Cpy* stance / run, R1 turn / run / move nets, Go2 planner nets …)
+  // extra networks the drivers run (G1 Cpy* stance / run, R1 turn / run / move nets, Go2 planner nets, AS2 walk /
+  // recovery nets …)
   for (const [role, rel] of Object.entries({ ...(cfg.g1?.aux_models ?? {}), ...(cfg.r1?.aux_models ?? {}),
-                                              ...(cfg.go2?.aux_models ?? {}) })) {
+                                              ...(cfg.go2?.aux_models ?? {}), ...(cfg.as2?.aux_models ?? {}) })) {
     const f = `aux/${role}.onnx`;
     files[f] = new Uint8Array(readFileSync(join(pub, onnxOf(rel))));
     (manifest.aux ??= {})[role] = f;

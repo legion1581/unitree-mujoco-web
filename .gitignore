@@ -2,7 +2,7 @@
 node_modules/
 dist/
 
-# robot-derived assets: only the g1 / r1 / go2 model bundles are checked in, so a
+# robot-derived assets: only the g1 / r1 / go2 / as2 model bundles are checked in, so a
 # fresh clone runs out of the box. Re-include per level: a parent dir must stay
 # traversable (dir/* instead of dir/) for the deeper negations to take effect.
 public/assets/*
@@ -12,6 +12,7 @@ public/assets/models/*
 !public/assets/models/go2/
 !public/assets/models/r1/
 !public/assets/models/g1/
+!public/assets/models/as2/
 
 # local policy weights cache, written by scripts/import_*.py (never committed)
 /assets/

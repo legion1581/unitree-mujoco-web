@@ -6,8 +6,9 @@ renders the scene.
 
 ![Unitree MuJoCo web — R1 walking on the park terrain](docs/media/hero.png)
 
-**Supported robots:** R1 (24 and 20 DOF), Go2, and G1 (29 and 23 DOF). Per-policy notes:
-[G1](docs/G1_FIRMWARE_POLICIES.md) · [R1](docs/R1_FIRMWARE_POLICIES.md) · [Go2](docs/GO2_FIRMWARE_POLICIES.md).
+**Supported robots:** R1 (24 and 20 DOF), Go2, AS2, and G1 (29 and 23 DOF). Per-policy notes:
+[G1](docs/G1_FIRMWARE_POLICIES.md) · [R1](docs/R1_FIRMWARE_POLICIES.md) · [Go2](docs/GO2_FIRMWARE_POLICIES.md) ·
+[AS2](docs/AS2_FIRMWARE_POLICIES.md).
 
 ## Gallery
 
@@ -25,6 +26,13 @@ Recorded in the browser app, flat terrain, hoist off, real time. The number is t
 <table>
 <tr><td align="center" width="33%"><img src="docs/media/go2_walk.gif" alt="Walk · 1003 FreeWalk"><br><sub>Walk · 1003 FreeWalk</sub></td><td align="center" width="33%"><img src="docs/media/go2_backflip.gif" alt="Back flip · 2013"><br><sub>Back flip · 2013</sub></td><td align="center" width="33%"><img src="docs/media/go2_leftflip.gif" alt="Left flip · 2014"><br><sub>Left flip · 2014</sub></td></tr>
 <tr><td align="center" width="33%"><img src="docs/media/go2_tripleflip.gif" alt="Triple flip · ContinuousFlipX3"><br><sub>Triple flip · ContinuousFlipX3</sub></td><td align="center" width="33%"><img src="docs/media/go2_handstand.gif" alt="Hand stand · 2011"><br><sub>Hand stand · 2011</sub></td><td align="center" width="33%"><img src="docs/media/go2_backstand.gif" alt="Walk on hind legs · 2017 back stand"><br><sub>Walk on hind legs · 2017 back stand</sub></td></tr>
+</table>
+
+### AS2
+
+<table>
+<tr><td align="center" width="33%"><img src="docs/media/as2_sport.gif" alt="Sprint · 4 sport mode"><br><sub>Sprint · 4 sport mode</sub></td><td align="center" width="33%"><img src="docs/media/as2_sidegait.gif" alt="Walk on the left legs · 6 left side gait"><br><sub>Walk on the left legs · 6 left side gait</sub></td><td align="center" width="33%"><img src="docs/media/as2_frontflip.gif" alt="Front flip · 10 (forced, see notes)"><br><sub>Front flip · 10 (forced, <a href="docs/AS2_FIRMWARE_POLICIES.md#flips-in-the-firmware-unreachable">see notes</a>)</sub></td></tr>
+<tr><td align="center" width="33%"><img src="docs/media/as2_recovery.gif" alt="Roll over and stand · 12 recovery"><br><sub>Roll over and stand · 12 recovery</sub></td><td align="center" width="33%"><img src="docs/media/as2_crawl.gif" alt="Low crawl · 13 base height (0.2 m)"><br><sub>Low crawl · 13 base height (0.2 m)</sub></td><td align="center" width="33%"><img src="docs/media/as2_pushup.gif" alt="Push-ups · 25 fu wo cheng"><br><sub>Push-ups · 25 fu wo cheng</sub></td></tr>
 </table>
 
 ### G1
@@ -45,7 +53,7 @@ The robot models are included in the repo. The policies are not, so download
 them separately:
 
 1. Get the policy packs from <https://disk.yandex.com/d/TDS0JYh1GSjXow>
-   (`g1-all.zip`, `r1-all.zip`, `go2-all.zip`, or individual packs).
+   (`g1-all.zip`, `r1-all.zip`, `go2-all.zip`, `as2-all.zip`, or individual packs).
 2. In the app, open **Packs** (panel header) → **Import .zip…** and pick the files.
 
 Imported policies are stored in your browser (IndexedDB) and survive reloads.

@@ -41,7 +41,7 @@ weights must be converted to `.onnx` before packing.
 }
 ```
 
-- `robot` — `g1`, `r1`, `r1_air` or `go2`. Air and EDU variants share one robot
+- `robot` — `g1`, `r1`, `r1_air`, `go2` or `as2`. Air and EDU variants share one robot
   slot; the app adopts the right model from the selected policy automatically.
 - `group` — the obs-scheme label the picker clusters policies under.
 - `baseName` — the pack id and policy display name (`baseName@id` when a pack
@@ -50,8 +50,8 @@ weights must be converted to `.onnx` before packing.
 ## Bundles (share a whole set)
 
 A **bundle** is simply a `.zip` whose entries are pack `.zip`s — one file per
-robot model (`g1-all.zip`, `r1-all.zip`, `go2-all.zip`, built by
-`node scripts/build-packs.mjs --robot <g1|r1|go2>`). Upload it to any file host;
+robot model (`g1-all.zip`, `r1-all.zip`, `go2-all.zip`, `as2-all.zip`, built by
+`node scripts/build-packs.mjs --robot <g1|r1|go2|as2>`). Upload it to any file host;
 whoever downloads it imports the **one** file and gets every pack at once. The
 importer auto-detects single pack vs bundle (a bundle has no top-level
 `pack.json`).

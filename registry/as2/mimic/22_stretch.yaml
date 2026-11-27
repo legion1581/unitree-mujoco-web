@@ -1,0 +1,142 @@
+# AS2 FSM 22 Stretch (shen lan yao) (R2+A): motion net shen_lan_yao.mnn frames 60..250 (3.8 s)
+name: mimic/22_stretch
+robot: as2
+family: as2_fw
+source: AS2 OTA 2.0.2.0 ai_sport 1.0.0.17
+control: {step_dt: 0.02, sim_dt: 0.001}
+policy: {path: assets/policies/as2/mimic/shen_lan_yao.onnx, num_act: 12}
+as2:
+  firmware: true
+  fsm_id: 22
+  scheme: mimic
+  packs: {'3': normal_walk/3_normal_walk, '4': sport_mode/4_sport_mode, '5': climb_mode/5_climb_mode, '6': sided_gait/6_left_side_gait,
+    '7': sided_gait/7_right_side_gait, '8': sided_gait/8_handstand, '9': sided_gait/9_biped_stand, '10': flip/10_front_flip,
+    '11': flip/11_back_flip, '12': recovery/12_recovery, '13': base_height/13_base_height, '15': euler/15_euler, '16': mimic/16_bai_nian,
+    '17': mimic/17_bi_xin, '18': mimic/18_content, '19': mimic/19_dance1, '20': mimic/20_dance2, '21': mimic/21_handshake,
+    '22': mimic/22_stretch, '23': mimic/23_sit, '24': mimic/24_front_jump, '25': mimic/25_pushup, '26': mimic/26_up_jump}
+  base:
+    current_obs_dim: 51
+    one_step_obs_dim: 42
+    buffer_size: 6
+    clip_act: 10
+    clip_obs: 10
+    obs_lin_vel_scale: 2
+    obs_ang_vel_scale: 0.25
+    obs_joint_pos_scale: 1
+    obs_joint_vel_scale: 0.05
+    action_scale: 0.25
+    kp: 40
+    kd: 1.0
+    kp_calf: 60
+    kd_calf: 1.5
+    default_angle: [-0.0, 0.7, -1.4, 0.0, 0.7, -1.4, -0.0, 0.7, -1.4, 0.0, 0.7, -1.4]
+  controller:
+    foot_stand_down: [0.2079, 0.16, 0.1]
+    foot_stand_up: [0.2079, 0.16, 0.33]
+    foot_lie_down: [0.2079, 0.2, 0.08]
+    foot_recovery: [0.2079, 0.16, 0.15]
+  state_checker:
+    foot_pos_nominal: [0.2079, 0.16, 0.32]
+    nominal_check_time: 1.0
+    nominal_threshold_x: 0.1
+    nominal_threshold_y: 0.1
+    gait_threshold_vel: 0.05
+    disturbance_ang_vel_threshold: 0.5
+    disturbance_proj_gy_threshold: 0.3
+    disturbance_hold_time: 0.5
+    torque_limit: [60.0, 60.0, 90.0, 60.0, 60.0, 90.0, 60.0, 60.0, 90.0, 60.0, 60.0, 90.0]
+    motor_x1: [14.5, 14.5, 9.6667, 14.5, 14.5, 9.6667, 14.5, 14.5, 9.6667, 14.5, 14.5, 9.6667]
+    motor_x2: [22.7, 22.7, 15.133, 22.7, 22.7, 15.133, 22.7, 22.7, 15.133, 22.7, 22.7, 15.133]
+    motor_y1: [111.0, 111.0, 166.5, 111.0, 111.0, 166.5, 111.0, 111.0, 166.5, 111.0, 111.0, 166.5]
+    motor_y2: [131.0, 131.0, 196.5, 131.0, 131.0, 196.5, 131.0, 131.0, 196.5, 131.0, 131.0, 196.5]
+    motor_limit_sacle: 1.0
+  cfg:
+    normal_walk:
+      model_file: model/normal_walk/2026-03-11__21-21_.mnn
+      vx_limit: [0.8, 1.5]
+      vy_limit: [0.5, 0.5]
+      vyaw_limit: [2.0, 2.5]
+      vel_filter: [0.1, 0.1, 0.1]
+      gait_freq_low: 1.5
+      gait_freq_high: 1.8
+      foot_height: 0.08
+      obs_foot_height_scale: 5.0
+    sport_mode:
+      model_file: model/sport_mode/2026-05-14__18-14_.mnn
+      vx_limit: 3.5
+      vy_limit: 0.3
+      vyaw_limit: 1.5
+      vel_filter: [0.08, 0.1, 0.1]
+      gait_freq: 2.6
+      foot_height: 0.08
+      obs_foot_height_scale: 10.0
+    climb_mode:
+      model_file: model/climb_mode/2026-01-30__22-03_.mnn
+      cmd_limit: [0.5, 0.5, 1.0]
+      cmd_filter: [0.1, 0.1, 0.1]
+      default_angle: [-0.0, 0.35, -1.3, 0.0, 0.35, -1.3, -0.0, 0.7, -1.4, 0.0, 0.7, -1.4]
+    base_height:
+      model_file: model/base_height/2026-06-09__20-35_.mnn
+      vx_limit: [0.8, 1.5]
+      vy_limit: [0.5, 0.5]
+      vyaw_limit: [2.0, 2.5]
+      base_height_range: [0.2, 0.38]
+      vel_filter: [0.1, 0.1, 0.1]
+      gait_freq_low: 1.8
+      gait_freq_high: 1.8
+      foot_height: 0.05
+      obs_foot_height_scale: 5.0
+    euler:
+      model_file: model/euler/2026-05-26__21-14_.mnn
+      euler_limit_upper: [0.3, 0.5, 0.3]
+      euler_limit_lower: [-0.3, -0.5, -0.3]
+      euler_filter: [0.1, 0.1, 0.1]
+      obs_euler_cmd_scale: 4.0
+    sided_gait:
+      model_file: model/sided_gait/2026-05-11__12-14_.mnn
+      cmd_limit: [1.0, 0.5, 1.0]
+      cmd_filter: [0.05, 0.1, 0.1]
+      max_pitch_cmd: 1.2
+      max_roll_cmd: 0.4
+      current_obs_dim: 47
+      buffer_size: 4
+    flip:
+      model_file_forward_flip: model/flip/f2026-06-07__16-07_.mnn
+      model_file_backflip: model/flip/b2026-06-04__20-31_.mnn
+      vel_cmd_limit: [0.5, -0.0, -0.5]
+      max_cmd_acc: [0.05, 0.08, 0.05]
+      flip_time: 1.4286
+      clip_act: 20
+      clip_obs: 20
+      obs_lin_vel_scale: 2
+      obs_ang_vel_scale: 0.25
+      obs_joint_pos_scale: 1
+      obs_joint_vel_scale: 0.05
+      obs_foot_height_scale: 5.0
+      action_scale: 0.25
+      kp: 40
+      kd: 1.0
+      kp_calf: 60
+      kd_calf: 1.5
+      default_angle: [-0.0, 0.7, -1.4, 0.0, 0.7, -1.4, -0.0, 0.7, -1.4, 0.0, 0.7, -1.4]
+    recovery: {model_file: model/recovery/2026-01-07__18-00_.mnn}
+  aux_models: {walk: assets/policies/as2/normal_walk/2026-03-11__21-21_.onnx, recovery: assets/policies/as2/recovery/2026-01-07__18-00_.onnx}
+  mimic:
+    obs_dim: 69
+    act_dim: 12
+    kp: [40.0, 40.0, 60.0, 40.0, 40.0, 60.0, 40.0, 40.0, 60.0, 40.0, 40.0, 60.0]
+    kd: [1.0, 1.0, 1.5, 1.0, 1.0, 1.5, 1.0, 1.0, 1.5, 1.0, 1.0, 1.5]
+    act_scale: [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.25]
+    obs_mean: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0, 0.0,
+      0.0, 0.0, 0.7, 0.7, 0.7, 0.7, -1.4, -1.4, -1.4, -1.4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0]
+    act_mean: [0.0, 0.0, 0.0, 0.0, 0.7, 0.7, 0.7, 0.7, -1.4, -1.4, -1.4, -1.4]
+    motion_len: 1000
+    motion: shen_lan_yao
+    idx: [60, 250]
+    transition: 0.2
+control_ui:
+  actions:
+  - group: Motion
+    items:
+    - {combo: R2+A, label: Play again (R2+A)}
